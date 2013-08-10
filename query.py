@@ -5,6 +5,8 @@ import os
 import optparse
 import subprocess
 import MySQLdb
+import getpass
+import time
 from contextlib import contextmanager
 from multiprocessing import Process
 
@@ -15,15 +17,30 @@ DEFAULT_DB_HOST = "edx-prod-ro.cn2cujs3bplc.us-west-1.rds.amazonaws.com"
 DEFAULT_DB_PORT = 3306
 DEFAULT_DATABASE = "edxprod"
 
+SQL_QUERY = """
+select au.email, sm.created, sm.grade, sm.max_grade
+from auth_user au, courseware_studentmodule sm
+where sm.student_id = au.id
+and course_id = 'Carnegie/2013/Forest_Monitoring_with_CLASlite'
+and sm.module_type = 'problem'
+"""
+
+
 def main():
     parse_command_line()
     ssh_test()
     with ssh_tunnel():
         result = query()
-    print result
+    if result == None:
+        sys.exit(1)
+    log_info("Success! rows = %d" % len(result))
+    for row in result:
+        rowstr = (str(col) for col in row)
+        print ",".join(rowstr)
+
 
 def ssh_test():
-    test_cmd = 'ssh -o "BatchMode yes" %s@%s "echo OK"' \
+    test_cmd = 'ssh -o "BatchMode yes" %s@%s "exit 0"' \
                % (options.gateway_user, options.gateway_host)
     log_info("testing SSH with command: %s" % test_cmd)
     try:
@@ -49,16 +66,40 @@ def ssh_tunnel():
     # Setup
     log_info("starting ssh tunnel: %s" % ' '.join(tunnel_cmd))
     tunnel_proc = subprocess.Popen(tunnel_cmd)
+    time.sleep(3)  # hack: tunnel needs a few seconds to work
     yield
 
     # Teardown 
     log_info("stopping ssh tunnel")
     tunnel_proc.kill()
 
+
 def query():
-    for i in xrange(5):
-        print i+1, "of 5"
-        import time; time.sleep(1)
+    """
+    Use the established ssh tunnel to query the remote mysql database.
+    Assumes that the tunnel is accessible through a localhost port.
+
+    Returns None if there is a problem, or a list of the results of the
+    query. An empty list is a valid result.
+    """
+    log_info("query = %s" % SQL_QUERY)
+    result = None
+    conn = None
+    try:
+        conn = MySQLdb.connect(host='127.0.0.1', 
+                port=options.local_port,
+                user=options.db_user, 
+                passwd=options.db_password, 
+                db=options.db_name);
+        cur = conn.cursor()
+        cur.execute(SQL_QUERY)
+        result = cur.fetchall()
+    except MySQLdb.Error as e:
+        sys.stderr.write("Database error %d: %s\n" % (e.args[0],e.args[1]))
+    if conn:
+        conn.close()
+    return result
+
 
 def parse_command_line():
     usage = """usage: %prog [options]
@@ -92,7 +133,7 @@ def parse_command_line():
     parser.add_option("--dbuser", dest="db_user", 
         default=DEFAULT_DB_USER,
         help="Database user (default=%s)" % DEFAULT_DB_USER)
-    parser.add_option("-d", "--db", dest="database", 
+    parser.add_option("-d", "--db", dest="db_name", 
         default=DEFAULT_DATABASE,
         help="Database name to query on the host (default=\"%s\")" \
              % DEFAULT_DATABASE)
@@ -101,6 +142,9 @@ def parse_command_line():
 
     global options
     (options, args) = parser.parse_args()
+
+    if not hasattr(options, 'db_password'):
+        options.db_password = getpass.getpass("database password: ")
 
 
 def log_info(msg):
