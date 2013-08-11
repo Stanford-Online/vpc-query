@@ -1,22 +1,26 @@
 #!/usr/bin/env python
+#
+# A simple script to read a database via ssh gateway. For info 
+# see the README file here: https://github.com/Stanford-Online/vpc-query
+#
 
 import sys
 import os
-import optparse
-import subprocess
-import MySQLdb
-import getpass
 import time
+import optparse
+import getpass
+import subprocess
 from contextlib import contextmanager
-from multiprocessing import Process
+import MySQLdb
 
 DEFAULT_LOCAL_PORT = 15606
-DEFAULT_GATEWAY_HOST = "jump-prod"
-DEFAULT_DB_USER = "readonly"
+DEFAULT_GATEWAY_HOST = "jump.prod.class.stanford.edu"
+DEFAULT_DB_USER = "readonly"   # TODO: change to your gateway account
 DEFAULT_DB_HOST = "edx-prod-ro.cn2cujs3bplc.us-west-1.rds.amazonaws.com"
 DEFAULT_DB_PORT = 3306
-DEFAULT_DATABASE = "edxprod"
+DEFAULT_DATABASE = "edxprod"   # TODO: change to your db account
 
+# TODO: modify this with columns, course_id that make sense for you
 SQL_QUERY = """
 select au.email, sm.created, sm.grade, sm.max_grade
 from auth_user au, courseware_studentmodule sm
@@ -34,6 +38,8 @@ def main():
     if result == None:
         sys.exit(1)
     log_info("Success! rows = %d" % len(result))
+
+    # TODO: change output format our do other data processing here
     for row in result:
         rowstr = (str(col) for col in row)
         print ",".join(rowstr)
