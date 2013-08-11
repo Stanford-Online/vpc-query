@@ -52,14 +52,14 @@ Operation
 2. **Execute**. Run the script, capturing the output.  Generally
    you'll want to run with something like this:
 
-       `python query.py -v -user=carnegie --dbuser=carnegie > output.txt`
+       `python query.py -v --user=carnegie --dbuser=carnegie > output.txt`
 
 
 
 Example Output
 -------------------
 
-Stderr:
+**Stderr**
 
     ./query.py -v --dbuser=carnegie
     database password: 
@@ -75,6 +75,15 @@ Stderr:
     INFO: stopping ssh tunnel
     INFO: Success! rows = 260
 
-An example of what gets written to stdout can be seen [here](example_output.html). Email addresses have been redacted.
+**Stdout**
 
+An example of what gets written is in the `example_output.html`
+file checked into this repo (with email addresses redacted).  An
+excerpt here:
+
+    redacted@stanford.edu,2013-06-15 00:18:11,0.0,1.0
+    redacted@stanford.edu,2013-06-15 00:18:12,None,None
+    redacted@stanford.edu,2013-06-15 00:18:12,None,None
+    redacted@stanford.edu,2013-06-15 00:18:12,None,None
+    redacted@stanford.edu,2013-06-15 00:46:39,1.0,1.0
 
