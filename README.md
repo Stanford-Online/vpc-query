@@ -24,9 +24,9 @@ Setup
 -----
 
 1. **SSH Key**. You need an ssh key on the gateway to access anything
-   in the VPC. Generate an ssh key (or use an exsisting one) and
-   send us the **public half** of your key -- we definintely don't
-   want to see the public half.  Since this is a public key, you
+   in the VPC. Generate an ssh key (or use an existing one) and
+   send us the **public half** of your key -- we definitely don't
+   want to see the private half.  Since this is a public key, you
    can send to in a regular email, as an attachment or just copy/paste.
    Send to <openedx-courseops@lists.stanford.edu> and we can install
    to our SSH gateway pretty quickly.
@@ -47,7 +47,7 @@ Operation
 
 1. **SSH Agent**. Make sure your ssh key is in an ssh agent. From your shell, use this
    command to see: ``ssh-add -l``.  Make sure this includes the private
-   lalf of the ssh key that you had Ops put on the gateway
+   half of the ssh key that you had Ops put on the gateway
 
 2. **Execute**. Run the script, capturing the output.  Generally
    you'll want to run with something like this:
