@@ -87,3 +87,8 @@ excerpt here:
     redacted@stanford.edu,2013-06-15 00:18:12,None,None
     redacted@stanford.edu,2013-06-15 00:46:39,1.0,1.0
 
+
+DEPRECATED
+==========
+
+This is no longer supported. It should not be used.
